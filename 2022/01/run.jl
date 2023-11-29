@@ -2,7 +2,7 @@
 using Revise
 import Elves
 
-elves = Elves.read_elves("2022/data/01.txt")
+elves = Elves.read_elves_calories("2022/data/01.txt")
 ##
 Elves.most_calories_carried(elves)
 ##

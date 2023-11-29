@@ -1,13 +1,13 @@
 module Elves
 
-export read_elves, most_calories_carried, sum_top_n_elves
+export read_elves_calories, most_calories_carried, sum_top_n_elves
 
 """
     read_elves(filename)
 
 Read data on calories carried by each elf.
 """
-function read_elves(filename)
+function read_elves_calories(filename)
     elves::Vector{Vector{Int}} = [[]]
     for num in eachline(filename)
         if length(num) == 0
