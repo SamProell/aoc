@@ -37,7 +37,7 @@ block = """seed-to-soil map:
 """
 parse_map(block)
 ##
-almanac_input = replace(read("2023/data/05ex.txt", String), "\r" => "")
+almanac_input = replace(read("2023/data/05.txt", String), "\r" => "")
 almanac_blocks = split(almanac_input, "\n\n")
 seeds = parse_seeds(almanac_blocks[1])
 almanac = map(parse_map, almanac_blocks[2:end])
@@ -81,57 +81,35 @@ seeds2 = parse_seeds2(almanac_blocks[1])
 function map_range(seed_interval::Interval, almanac_map::AlmanacMap)::Vector{Interval}
     dest_ranges = []
     for r in sort(almanac_map.ranges, by=r -> r.interval.start)
+        if seed_interval.start == seed_interval.stop
+            break
+        end
         overlap = intersect(seed_interval, r.interval)
         if !(isnothing(overlap))
             if overlap.start > seed_interval.start
                 push!(dest_ranges, Interval(seed_interval.start, overlap.start))
             end
-            shifted = overlap + r.shift
-            push!(dest_ranges, shifted)
-            if seed_interval.stop > overlap.stop
+            push!(dest_ranges, overlap + r.shift)
+            if seed_interval.stop >= overlap.stop
                 seed_interval = Interval(overlap.stop, seed_interval.stop)
-            elseif seed_interval.stop == overlap.stop
-                break
             end
         end
     end
-    # for r in sort(almanac_map.ranges, by=x -> x.source_start)
-    #     if seed_interval.start - seed_interval.stop == 0
-    #         break
-    #     end
-    #     if seed_interval.stop < r.source_start
-    #         push!(dest_ranges, seed_interval)
-    #         break
-    #     end
-    #     source_interval = Interval(r.source_start, r.source_start + r.length)
-    #     overlap = intersect(seed_interval, source_interval)
-    #     if !(isnothing(overlap))
-    #         if overlap.start > seed_interval.start
-    #             push!(dest_ranges, Interval(seed_interval.start, overlap.start))
-    #         end
-    #         shifted = overlap + (r.dest_start - r.source_start)
-    #         push!(dest_ranges, shifted)
-    #         if overlap.stop < seed_interval.stop
-    #             seed_interval = Interval(overlap.stop, seed_interval.stop)
-    #         end
-    #     end
-    # end
-    # push!(dest_ranges, seed_interval)
-    return sort(dest_ranges, by=i -> i.start)
+    if seed_interval.start != seed_interval.stop
+        push!(dest_ranges, seed_interval)
+    end
+    return dest_ranges
 end
 map_range(seeds2[1], almanac[1])
-
-vcat(map(s -> map_range(s, almanac[1]), seeds2)...)
 ##
-function get_location2(seeds::Vector{Interval}, almanac)::Vector{Interval}
-    newvalue = seeds
-    for m in almanac
-        print(newvalue, "     ")
+function get_location2(seeds::Vector{Interval}, almanac_::Vector{AlmanacMap})::Vector{Interval}
+    newvalue::Vector{Interval} = seeds
+    for m in almanac_
         newvalue = vcat(map(s -> map_range(s, m), newvalue)...)
     end
     return newvalue
 end
 
-locations2 = vcat(get_location2(seeds2, almanac[1:2])...)
-# findmin(map(l -> l[1], locations2))
+locations2 = get_location2(seeds2, almanac)
+findmin(map(l -> l.start, locations2))
 ## 
