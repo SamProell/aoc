@@ -1,5 +1,7 @@
 module Elves
+import Base: +, contains, intersect
 
+export Interval, intersect, +, contains
 
 function first_digit(s::String)::Char
     for c in s
@@ -35,5 +37,31 @@ function extract_number(s::String)::Int
     second = first_digit(reverse(s))
     return parse(Int, first * second)
 end
+
+
+struct Interval
+    start::Int
+    stop::Int
+end
+
+function intersect(a::Interval, b::Interval)::Union{Interval,Nothing}
+    a, b = sort([a, b], by=i -> i.start)
+    start = nothing
+    if a.stop >= b.start
+        start = b.start
+    end
+    stop = a.stop - 1
+    if stop > b.stop
+        stop = b.stop
+    end
+    if isnothing(start)
+        return nothing
+    end
+    return Interval(start, stop)
+end
+
+contains(ab::Interval, c::Int)::Bool = (c >= ab.start) && (c < ab.stop)
+
++(ab::Interval, c::Int) = Interval(ab.start + c, ab.stop + c)
 
 end # module Elves
