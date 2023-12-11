@@ -3,7 +3,7 @@ using Revise
 using Elves
 ##
 # 7: ┐ F: ┌ J: ┘
-pipe_grid = vcat(collect.(eachline("2023/data/10.txt")))
+pipe_grid = vcat(collect.(eachline("2023/data/10ex3.txt")))
 pipe_array = reduce(hcat, pipe_grid)
 ##
 struct Tile
@@ -14,8 +14,8 @@ end
 function Tile(x::Int, y::Int)::Tile
     return Tile(x, y, '.')
 end
+##
 maze = Array{Tile}(undef, size(pipe_array)...)
-## 
 for x in 1:size(pipe_array)[1]
     for y in 1:size(pipe_array)[2]
         maze[x, y] = Tile(x, y, pipe_array[x, y])
@@ -23,34 +23,54 @@ for x in 1:size(pipe_array)[1]
 end
 start_pos = maze[findfirst(t -> t.tiletype == 'S', maze)]
 ##
+@enum Direction East South West North
+##
+function get_direction(t1::Tile, t2::Tile)::Direction
+    if t1.x < t2.x
+        return East
+    elseif t1.x > t2.x
+        return West
+    elseif t1.y > t2.y
+        return North
+    elseif t1.y < t2.y
+        return South
+    end
+    error("Cannot determine direction with ", t1, " and ", t2)
+end
 
-function can_connect(t1::Char, t2::Char, direction)::Bool
+function can_connect(t1::Tile, t2::Tile)::Bool
+    direction = get_direction(t1, t2)
     return (
-        ((direction == "^") && (t1 in "S|JL") && (t2 in "7|F"))
+        ((direction == North) && (t1.tiletype in "S|JL") && (t2.tiletype in "7|F"))
         ||
-        ((direction == ">") && (t1 in "S-FL") && (t2 in "J7-"))
+        ((direction == East) && (t1.tiletype in "S-FL") && (t2.tiletype in "J7-"))
         ||
-        ((direction == "v") && (t1 in "S7|F") && (t2 in "J|L"))
+        ((direction == South) && (t1.tiletype in "S7|F") && (t2.tiletype in "J|L"))
         ||
-        ((direction == "<") && (t1 in "S7-J") && (t2 in "F-L"))
+        ((direction == West) && (t1.tiletype in "S7-J") && (t2.tiletype in "F-L"))
     )
 end
 
+function get_neighbors(t::Tile, grid::Matrix{Tile})
+    neighbors = Tile[]
+    if t.x > 1
+        push!(neighbors, grid[t.x-1, t.y])
+    end
+    if t.x < size(grid)[1]
+        push!(neighbors, grid[t.x+1, t.y])
+    end
+    if t.y > 1
+        push!(neighbors, grid[t.x, t.y-1])
+    end
+    if t.y < size(grid)[2]
+        push!(neighbors, grid[t.x, t.y+1])
+    end
+    return neighbors
+end
+get_neighbors(start_pos, maze)
+##
 function incoming_pipes(t::Tile, grid::Matrix{Tile})
-    incoming::Vector{Tile} = []
-    if (t.x > 1) && can_connect(t.tiletype, grid[t.x-1, t.y].tiletype, "<")
-        push!(incoming, grid[t.x-1, t.y])
-    end
-    if (t.y > 1) && can_connect(t.tiletype, grid[t.x, t.y-1].tiletype, "^")
-        push!(incoming, grid[t.x, t.y-1])
-    end
-    if (t.y < size(grid)[2]) && can_connect(t.tiletype, grid[t.x, t.y+1].tiletype, "v")
-        push!(incoming, grid[t.x, t.y+1])
-    end
-    if (t.x < size(grid)[1]) && can_connect(t.tiletype, grid[t.x+1, t.y].tiletype, ">")
-        push!(incoming, grid[t.x+1, t.y])
-    end
-    return incoming
+    return filter(n -> can_connect(t, n), get_neighbors(t, grid))
 end
 incoming_pipes(start_pos, maze)
 ##
@@ -72,7 +92,7 @@ function move!(current::Vector{Tile}, grid::Matrix{Tile}, len::Matrix{Int})
     end
     move!(current, grid, len)
 end
-## 
+##
 dists = fill(-1, size(maze))
 dists[start_pos.x, start_pos.y] = 0
 move!([start_pos], maze, dists)
@@ -80,3 +100,16 @@ permutedims(dists)
 ##
 # Part 1:
 findmax(dists)
+# %%
+function grow!(seed::Tile, grid::Matrix{Tile}, area::Matrix{Int}, region::Int)
+    neighbors = get_neighbors(seed, grid)
+    same_region = filter(n -> area[n.x, n.y] == -1, neighbors)
+    for n in same_region
+        area[n.x, n.y] = region
+        grow!(n, grid, area, region)
+    end
+end
+
+area = copy(dists)
+grow!(start_pos, maze, area, findmin(area)[1] - 1)
+permutedims(area)
