@@ -1,6 +1,6 @@
 ##
 using Revise
-using Elves
+import Elves
 ##
 data = readlines("2023/data/01.txt")
 ##

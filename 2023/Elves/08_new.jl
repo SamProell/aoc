@@ -19,7 +19,7 @@ end
 
 
 function parse_map(lines)::Tuple{Vector{AbstractString},Vector{Tuple{Int,Int}}}
-    nodes = [parse_node(l) for l in lines]
+    nodes = map(parse_node, lines)
     node_names = [node.name for node in nodes]
     node_indices = Dict([n => i for (i, n) in enumerate(node_names)])
     node_map = []

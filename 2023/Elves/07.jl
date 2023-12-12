@@ -66,7 +66,7 @@ end
 import DelimitedFiles
 data = DelimitedFiles.readdlm("2023/data/07.txt", ' ', String)
 hands = [CamelCardHand(h) for h in data[:, 1]]
-bids = [parse(Int, b) for b in data[:, 2]]
+bids = parse.(Int, data[:, 2])
 perm = sortperm(hands)
 ranks = [findall(x -> x == i, perm)[1] for i in 1:length(hands)]
 ##

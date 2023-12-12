@@ -8,8 +8,8 @@ struct RaceRecord
 end
 function read_race_records(filename::AbstractString)::Vector{RaceRecord}
     lines = readlines(filename)
-    times = [parse(Int, t) for t in split(split(lines[1], ":")[2])]
-    distances = [parse(Int, d) for d in split(split(lines[2], ":")[2])]
+    times = parse.(Int, split(split(lines[1], ":")[2]))
+    distances = parse.(Int, split(split(lines[2], ":")[2]))
     return map(p -> RaceRecord(p...), zip(times, distances))
 end
 
@@ -21,7 +21,7 @@ function possible_outcomes(dur::Int)::Vector{Int}
     #     push!(distances, pressed * (dur - pressed))
     # end
     # return distances
-    return [pressed * (dur - pressed) for pressed in range(0, dur)]
+    return [pressed * (dur - pressed) for pressed in range(0, length=dur)]
 end
 ##
 function better_outcomes(record::RaceRecord)::Vector{Int}
@@ -31,7 +31,7 @@ end
 # Part 1: 275724
 prod(map(r -> length(better_outcomes(r)), records))
 
-## 
+##
 function read_race_record2(filename::AbstractString)::RaceRecord
     lines = readlines(filename)
     getnumber(l) = parse(Int, replace(split(l, ":")[2], " " => ""))

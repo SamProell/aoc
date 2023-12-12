@@ -2,7 +2,7 @@
 using Revise
 using Elves
 ##
-parse_line(line) = [parse(Int, n) for n in split(line)]
+parse_line(line) = parse.(Int, split(line))
 histories = map(parse_line, eachline("2023/data/09.txt"))
 ##
 struct Prediction

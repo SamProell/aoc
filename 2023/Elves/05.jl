@@ -2,9 +2,7 @@
 using Revise
 using Elves
 ##
-function parse_seeds(line::AbstractString)::Vector{Int}
-    return map(n -> parse(Int, n), split(line)[2:end])
-end
+parse_seeds(line::AbstractString)::Vector{Int} = parse.(Int, split(line)[2:end])
 parse_seeds("seeds: 79 14 55 13")
 ##
 struct AlamnacRange
@@ -25,7 +23,7 @@ function parse_map(block::AbstractString)
         if length(line) < 2
             continue
         end
-        dest, source, len = map(n -> parse(Int, n), split(line))
+        dest, source, len = parse.(Int, split(line))
         push!(ranges, AlamnacRange(dest - source, Interval(source, source + len)))
     end
     return AlmanacMap(name, ranges)
@@ -66,7 +64,7 @@ locations = map(s -> get_location(s, almanac), seeds)
 findmin(locations)
 ##
 function parse_seeds2(line::AbstractString)::Vector{Interval}
-    numbers = map(n -> parse(Int, n), split(line)[2:end])
+    numbers = parse.(Int, split(line)[2:end])
     ranges = []
     for i in 1:2:length(numbers)
         start, len = numbers[i:i+1]
@@ -112,4 +110,4 @@ end
 
 locations2 = get_location2(seeds2, almanac)
 findmin(map(l -> l.start, locations2))
-## 
+##

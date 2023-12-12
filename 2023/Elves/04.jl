@@ -8,13 +8,13 @@ Card = Tuple{Vector{Int},Vector{Int}}
 function parse_card(line::AbstractString)::Card
     _, rest = split(line, ":")
     winning_part, given_part = split(rest, "|")
-    winning = map(s -> parse(Int, s), split(winning_part))
-    given = map(s -> parse(Int, s), split(given_part))
+    winning = parse.(Int, split(winning_part))
+    given = parse.(Int, split(given_part))
     return (winning, given)
 end
 
 cards = map(parse_card, eachline("2023/data/04.txt"))
-## 
+##
 
 get_scoring_numbers(card) = intersect(map(Set, card)...)
 
@@ -26,7 +26,7 @@ function score_card(card::Card)
     return 2^(length(scoring_numbers) - 1)
 end
 score_card(cards[1])
-## 
+##
 # Part 1
 sum(map(score_card, cards))
 ##
