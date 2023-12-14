@@ -1,7 +1,7 @@
 module Elves
 import Base: +, contains, intersect
 
-export Interval, intersect, +, contains
+export Interval, intersect, +, contains, read_char_array
 
 first_digit(s::String)::Char = first(filter(isdigit, s))
 
@@ -57,5 +57,7 @@ end
 contains(ab::Interval, c::Int)::Bool = (c >= ab.start) && (c < ab.stop)
 
 +(ab::Interval, c::Int) = Interval(ab.start + c, ab.stop + c)
+
+read_char_array(filename) = permutedims(reduce(hcat, collect.(eachline(filename))))
 
 end # module Elves
