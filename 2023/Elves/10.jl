@@ -52,25 +52,33 @@ function can_connect(t1::Tile, t2::Tile)::Bool
 end
 
 function get_neighbors(t::Tile, grid::Matrix{Tile})
-    neighbors = Tile[]
+    neighbors = Vector{Union{Tile,Nothing}}
     if t.x > 1
         push!(neighbors, grid[t.x-1, t.y])
+    else
+        push!(neighbors, nothing)
     end
     if t.x < size(grid)[1]
         push!(neighbors, grid[t.x+1, t.y])
+    else
+        push!(neighbors, nothing)
     end
     if t.y > 1
         push!(neighbors, grid[t.x, t.y-1])
+    else
+        push!(neighbors, nothing)
     end
     if t.y < size(grid)[2]
         push!(neighbors, grid[t.x, t.y+1])
+    else
+        push!(neighbors, nothing)
     end
     return neighbors
 end
 get_neighbors(start_pos, maze)
 ##
 function incoming_pipes(t::Tile, grid::Matrix{Tile})
-    return filter(n -> can_connect(t, n), get_neighbors(t, grid))
+    return filter(n -> can_connect(t, n), filter(n -> n != nothing, get_neighbors(t, grid)))
 end
 incoming_pipes(start_pos, maze)
 ##
